@@ -1,0 +1,8 @@
+1. Using sconfig for the following on the server:
+ - changed the IP address
+ - changed the hostname
+ - changed the DNS to the IP address
+
+Install-WindowsFeatures AD-Domain-Services -IncludeManagementTools
+
+
