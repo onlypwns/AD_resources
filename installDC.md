@@ -18,7 +18,7 @@
     cp .\get_user.ps1 -ToSession $dc C:\Windows\Tasks\
    
 3. Installed AD on the DC
- - Commands:
+   Commands:
    Install-WindowsFeatures AD-Domain-Services -IncludeManagementTools
  
    Import-Module ADDSDeployment
@@ -37,5 +37,6 @@
 
  
 5. Joining the workstation to the domain
+   
    Add-Computer -DomainName <domain_name> -Credential <domain_name>\Administrator -Force -Restart
  
