@@ -1,0 +1,31 @@
+{
+    "domain" : "domain_name",
+
+    "groups" : [
+        {
+            "name" : "Employees"
+        }
+    ],
+
+
+
+    "users":[
+
+        {
+            "name": "Mark Hunt",
+            "password": "SUPERCOMPLICATEDPASSWORD",            
+            "groups": [
+                "Employees"
+            ]
+        },
+
+        {
+            "name": "Paulo Costa",
+            "password": "SUPERCOMPLICATEDPASSWORDAGAIN",            
+            "groups": [
+                "Employees"
+            ]
+        }
+
+    ]
+}
