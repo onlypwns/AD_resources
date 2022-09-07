@@ -1,1 +1,1 @@
-Setting up DC
+Setting up DC with multiple workstations project
