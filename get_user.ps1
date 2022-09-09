@@ -1,56 +1,47 @@
-param( [ Parameter(Mandatory=$true) ] $JSONFile )
+param([Parameter (Mandatory=$true)] $OutputJSONFile)
 
-function CreateADGroup(){
-    param( [ Parameter(Mandatory=$true) ] $groupObject )
-    $name = $groupObject.name
-    New-ADGroup -name $name -GroupScope Global
+$group_names = [System.Collections.ArrayList](Get-Content 'data/group.txt')
+$first_names = [System.Collections.ArrayList](Get-Content 'data/first_name.txt')
+$last_names = [System.Collections.ArrayList](Get-Content 'data/last_name.txt')
+$passwords = [System.Collections.ArrayList](Get-Content 'data/passwords.txt')
+
+
+$groups = @()
+$users = @()
+
+$num_groups = 10
+for ( $i = 0; $i -lt $num_groups; $i++ ){
+    $group_name = (Get-Random -InputObject $group_names)
+    $group = @{"name" = "$group_name"}
+    $groups += $group
+    $group_names.Remove($group_name)
+
 }
 
-
-function CreateADUser(){
-    param( [ Parameter(Mandatory=$true) ] $userObject ) 
-
-    # Pull the name from the JSON Object
-    $name = $userObject.name
-    $password = $userObject.password
-
-    # Generate a first intial last name structure for username
-    $firstname, $lastname = $name.Split(" ")
-    $username = ($firstname[0] + $lastname).ToLower()
-    $SamAccountName = $username
-    $principalname = $username
-
-    
-    # create user AD object
-    New-ADUser -Name "$name" -GivenName $firstname -Surname $lastname -SamAccountName $SamAccountName -UserPrincipalName $principalname@$Global:Domain -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount
-
-
-    # Add users to their group appropriately
-    foreach($group_name in $userObject.groups) {
-
-        try {
-            Get-ADGroup -Identity "$group_name"
-            Add-ADGroupMember -Identity $group_name -Members $username
+$num_users = 100
+for ( $i = 0; $i -lt $num_users; $i++ ){
+    $first_name = (Get-Random -InputObject $first_names)
+    $last_name = (Get-Random -InputObject $last_names)
+    $password = (Get-Random -InputObject $passwords)
+    $new_user = @{ `
+        "name" = "$first_name $last_name" 
+        "password" = "$password" 
+        "groups" = (Get-Random -InputObject $groups).name 
         }
-            catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundExceptio]
-            {
-                Write-Warning "User $user NOT added to group $group_name because it does not exist!"
-            }
-    }
+    $users += $new_user
 
+    $first_names.Remove($first_name)
+    $last_names.Remove($last_name)
+    $passwords.Remove($password)
+    
 }
 
-$json = (Get-Content $JSONFile | ConvertFrom-Json)
-
-$Global:Domain = $json.domain
-
-foreach ($group in $json.groups){
-    CreateADGroup $group
-}
-
-foreach ($user in $json.users){
-    CreateADUser $user
-}
+ConvertTo-Json -InputObject @{
+    "domain" = "xyz.com"
+    "groups" = $groups
+    "users" = $users
+    
+} | Out-File $OutputJSONFile
 
 
 
