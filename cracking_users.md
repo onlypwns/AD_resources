@@ -2,8 +2,8 @@
 
 - Used crackmapexec to crack user:pass combinations for low level users on the DC from files we created.
 
-  added random passwords from rockyou.txt into passwords.txt
-  added random users from the user.txt file 
+  /added random passwords from rockyou.txt into passwords.txt
+  /added random users from the user.txt file 
 
 - To run properly crackmapexec command had to configure the /etc/hosts file and the /etc/resolve.conf to add the DC address to it
   crackmapexec smb <ip> -u users.txt -p passwords.txt
