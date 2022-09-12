@@ -1,10 +1,10 @@
-param( [ Parameter(Mandatory=$true) ] $JSONFile,
-[switch] $Undo
-
-)
+param( 
+    [Parameter(Mandatory=$true)] $JSONFile,
+    [switch]$Undo
+ )
 
 function CreateADGroup(){
-    param( [ Parameter(Mandatory=$true) ] $groupObject )
+    param( [Parameter(Mandatory=$true)] $groupObject )
 
     $name = $groupObject.name
     New-ADGroup -name $name -GroupScope Global
@@ -17,38 +17,44 @@ function RemoveADGroup(){
     Remove-ADGroup -Identity $name -Confirm:$False
 }
 
-
 function CreateADUser(){
-    param( [ Parameter(Mandatory=$true) ] $userObject ) 
+    param( [Parameter(Mandatory=$true)] $userObject )
 
-    # Pull the name from the JSON Object
+    # Pull out the name from the JSON object
     $name = $userObject.name
     $password = $userObject.password
 
-    # Generate a first intial last name structure for username
+    # Generate a "first initial, last name" structure for username
     $firstname, $lastname = $name.Split(" ")
     $username = ($firstname[0] + $lastname).ToLower()
-    $SamAccountName = $username
+    $samAccountName = $username
     $principalname = $username
 
-    
-    # create user AD object
+    # Actually create the AD user object
     New-ADUser -Name "$name" -GivenName $firstname -Surname $lastname -SamAccountName $SamAccountName -UserPrincipalName $principalname@$Global:Domain -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount
 
-
-    # Add users to their group appropriately
+    # Add the user to its appropriate group
     foreach($group_name in $userObject.groups) {
 
         try {
             Get-ADGroup -Identity "$group_name"
             Add-ADGroupMember -Identity $group_name -Members $username
         }
-            catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundExceptio]
-            {
-                Write-Warning "User $user NOT added to group $group_name because it does not exist!"
-            }
+        catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+        {
+            Write-Warning "User $name NOT added to group $group_name because it does not exist"
+        }
     }
-
+    
+    # Add to local admin as needed
+    if ( $userObject.local_admin -eq $True){
+         net localgroup administrators $Global:Domain\$username /add
+    }
+    
+    #$add_command="net localgroup administrators $Global:Domain\$username /add"
+    #foreach ($hostname in $userObject.local_admin){
+    #    echo "Invoke-Command -Computer $hostname -ScriptBlock { $add_command }" | Invoke-Expression
+    #}
 }
 
 function RemoveADUser(){
@@ -60,7 +66,6 @@ function RemoveADUser(){
     $samAccountName = $username
     Remove-ADUser -Identity $samAccountName -Confirm:$False
 }
-
 
 function WeakenPasswordPolicy(){
     secedit /export /cfg C:\Windows\Tasks\secpol.cfg
@@ -77,7 +82,7 @@ function StrengthenPasswordPolicy(){
 }
 
 
-$json = (Get-Content $JSONFile | ConvertFrom-Json)
+$json = ( Get-Content $JSONFile | ConvertFrom-JSON)
 $Global:Domain = $json.domain
 
 if ( -not $Undo) {
@@ -100,5 +105,3 @@ if ( -not $Undo) {
         RemoveADGroup $group
     }
 }
-
-
