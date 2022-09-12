@@ -11,7 +11,7 @@
   Continue enumerating even when the user:pass combination has been found for a user\
   crackmapexec smb 192.168.8.155 -u users.txt -p passwords.txt --continue-on-success
 
-- Getting ready for bloodhound installing with neo4j  
+- Getting ready for bloodhound installing with from https://bloodhound.readthedocs.io/en/latest/installation/linux.html#install-java  
   sudo echo "deb http://httpredir.debian.org/debian stretch-backports main" | sudo tee -a /etc/apt/sources.list.d/stretch-backports.list\
   sudo apt-get update\
   wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -\necho 'deb https://debian.neo4j.com stable latest' >     /etc/apt/sources.list.d/neo4j.list\nsudo apt-get update\
