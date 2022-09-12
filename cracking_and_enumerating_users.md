@@ -26,7 +26,8 @@
 
   ...Starting bloodhound....
   
-- Sharphound python version from github https://github.com/fox-it/BloodHound.py\
+- Sharphound python version from github https://github.com/fox-it/BloodHound.py
+  
   pip install bloodhound\
   added bloodhound-python to the $PATH\
   /home/user/.local/bin\
